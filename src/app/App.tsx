@@ -83,6 +83,7 @@ import { Separator } from "./components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 import { toast } from "sonner";
 import { ImageWithFallback } from "./components/figma/ImageWithFallback";
+import { DashboardWork, DashboardMoney, DashboardPeople, DashboardIntelligence } from "./components/dashboard";
 
 // --- Design System Tokens ---
 const COLORS = {
@@ -211,6 +212,10 @@ const SideNav = ({ activeTab, setActiveTab, onStartFree, onLogout, isLoggedIn }:
   const tabs: { name: string, label: string, icon: any }[] = [
     { name: 'Home', label: isLoggedIn ? 'Overview' : 'Home', icon: isLoggedIn ? LayoutDashboard : Globe },
     { name: 'Features', label: isLoggedIn ? 'AI Agents' : 'Features', icon: isLoggedIn ? Bot : Layers },
+    { name: 'Work', label: 'Work', icon: CheckSquare },
+    { name: 'Money', label: 'Money', icon: DollarSign },
+    { name: 'People', label: 'People', icon: Users },
+    { name: 'Intelligence', label: 'Intelligence', icon: BrainCircuit },
     { name: 'ARCChat', label: 'ARC Chat', icon: MessageSquare },
     { name: 'Analytics', label: 'Analytics', icon: BarChart3 },
     { name: 'Playbooks', label: 'Playbooks', icon: BookOpen },
@@ -2838,6 +2843,10 @@ export default function App() {
                 {activeTab === 'Features' && (
                   isLoggedIn ? <DashboardAgents key="dash-agents" /> : <FeaturesPage key="features" onStartFree={handleStartFree} />
                 )}
+                {activeTab === 'Work' && <DashboardWork key="dash-work" />}
+                {activeTab === 'Money' && <DashboardMoney key="dash-money" />}
+                {activeTab === 'People' && <DashboardPeople key="dash-people" />}
+                {activeTab === 'Intelligence' && <DashboardIntelligence key="dash-intelligence" />}
                 {activeTab === 'ARCChat' && <DashboardARCChat key="dash-arcchat" />}
                 {activeTab === 'Analytics' && <DashboardAnalytics key="dash-analytics" />}
                 {activeTab === 'Playbooks' && <DashboardPlaybooks key="dash-playbooks" />}
@@ -2857,7 +2866,7 @@ export default function App() {
                 {activeTab === 'Contact' && <ContactPage key="contact" />}
                 
                 {/* Fallback for other tabs */}
-                {!['Home', 'Features', 'How It Works', 'Pricing', 'Use Cases', 'About', 'Contact', 'Analytics', 'Playbooks', 'Network', 'Settings', 'Onboard'].includes(activeTab) && (
+                {!['Home', 'Features', 'How It Works', 'Pricing', 'Use Cases', 'About', 'Contact', 'Analytics', 'Playbooks', 'Network', 'Settings', 'Onboard', 'Work', 'Money', 'People', 'Intelligence'].includes(activeTab) && (
                   <ContentWrapper key="other">
                     <section className="min-h-[80vh] flex flex-col items-center justify-center text-center px-4">
                       <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-6 uppercase tracking-tight">{activeTab}</h1>
