@@ -55,7 +55,17 @@ import {
   Github,
   Check,
   Mail,
-  Phone
+  Phone,
+  Send,
+  ChevronDown,
+  Wifi,
+  WifiOff,
+  ToggleLeft,
+  ToggleRight,
+  UserPlus,
+  LogOut,
+  CircleDot,
+  Sparkles
 } from "lucide-react";
 import { 
   LineChart, 
@@ -83,7 +93,7 @@ import { Separator } from "./components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 import { toast } from "sonner";
 import { ImageWithFallback } from "./components/figma/ImageWithFallback";
-import { DashboardWork, DashboardMoney, DashboardPeople, DashboardIntelligence } from "./components/dashboard";
+import { DashboardWork, DashboardMoney, DashboardPeople, DashboardIntelligence, PulseDashboard, AgentsDashboard, ARCChatDashboard } from "./components/dashboard";
 
 // --- Design System Tokens ---
 const COLORS = {
@@ -209,22 +219,104 @@ const MarketingTopNav = ({ activeTab, setActiveTab, onLogin }: { activeTab: NavT
 };
 
 const SideNav = ({ activeTab, setActiveTab, onStartFree, onLogout, isLoggedIn }: { activeTab: string, setActiveTab: (tab: any) => void, onStartFree: () => void, onLogout: () => void, isLoggedIn: boolean }) => {
+  // --- LOGGED IN: Slim icon rail (3 screens + settings) ---
+  if (isLoggedIn) {
+    const navItems = [
+      { name: 'Pulse', icon: Activity, label: 'Pulse' },
+      { name: 'Agents', icon: Bot, label: 'Agents' },
+      { name: 'ARCChat', icon: MessageSquare, label: 'ARC' },
+    ];
+    return (
+      <>
+        {/* Desktop: Slim left rail */}
+        <aside className="hidden md:flex flex-col w-[72px] border-r border-white/10 bg-[#05060f] h-screen sticky top-0 shrink-0 z-50 items-center py-6">
+          <div className="h-10 w-10 rounded-xl bg-[#818cf8] flex items-center justify-center shadow-[0_0_20px_rgba(129,140,248,0.4)] mb-10">
+            <Cpu className="h-5 w-5 text-white" />
+          </div>
+
+          <nav className="flex-1 flex flex-col items-center gap-2">
+            {navItems.map((item) => (
+              <button
+                key={item.name}
+                onClick={() => setActiveTab(item.name)}
+                className={`relative w-11 h-11 rounded-xl flex items-center justify-center transition-all group ${
+                  activeTab === item.name
+                    ? 'bg-[#818cf8]/15 text-[#818cf8]'
+                    : 'text-[#6e6e8a] hover:text-white hover:bg-white/5'
+                }`}
+                title={item.label}
+              >
+                <item.icon className="h-5 w-5" />
+                {activeTab === item.name && (
+                  <motion.div
+                    layoutId="railIndicator"
+                    className="absolute left-0 top-2 bottom-2 w-[3px] bg-[#818cf8] rounded-r-full shadow-[0_0_10px_rgba(129,140,248,0.6)]"
+                  />
+                )}
+              </button>
+            ))}
+          </nav>
+
+          <div className="flex flex-col items-center gap-3 mt-auto">
+            <button
+              onClick={() => setActiveTab('Settings')}
+              className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all ${
+                activeTab === 'Settings' ? 'bg-white/10 text-white' : 'text-[#6e6e8a] hover:text-white hover:bg-white/5'
+              }`}
+              title="Settings"
+            >
+              <Settings2 className="h-5 w-5" />
+            </button>
+            <button
+              onClick={onLogout}
+              className="w-11 h-11 rounded-xl flex items-center justify-center text-[#6e6e8a] hover:text-white hover:bg-white/5 transition-all"
+              title="Sign Out"
+            >
+              <History className="h-5 w-5" />
+            </button>
+          </div>
+        </aside>
+
+        {/* Mobile: Bottom bar */}
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-[#05060f]/95 backdrop-blur-xl border-t border-white/10 flex items-center justify-around px-4 z-50">
+          {navItems.map((item) => (
+            <button
+              key={item.name}
+              onClick={() => setActiveTab(item.name)}
+              className={`flex flex-col items-center gap-1 py-2 px-4 rounded-xl transition-all ${
+                activeTab === item.name ? 'text-[#818cf8]' : 'text-[#6e6e8a]'
+              }`}
+            >
+              <item.icon className="h-5 w-5" />
+              <span className="text-[9px] font-bold uppercase tracking-widest">{item.label}</span>
+              {activeTab === item.name && (
+                <motion.div layoutId="mobileIndicator" className="absolute bottom-1 h-[3px] w-8 bg-[#818cf8] rounded-full" />
+              )}
+            </button>
+          ))}
+          <button
+            onClick={() => setActiveTab('Settings')}
+            className={`flex flex-col items-center gap-1 py-2 px-4 rounded-xl transition-all ${
+              activeTab === 'Settings' ? 'text-white' : 'text-[#6e6e8a]'
+            }`}
+          >
+            <Settings2 className="h-5 w-5" />
+            <span className="text-[9px] font-bold uppercase tracking-widest">More</span>
+          </button>
+        </nav>
+      </>
+    );
+  }
+
+  // --- LOGGED OUT: Marketing side nav (unchanged) ---
   const tabs: { name: string, label: string, icon: any }[] = [
-    { name: 'Home', label: isLoggedIn ? 'Overview' : 'Home', icon: isLoggedIn ? LayoutDashboard : Globe },
-    { name: 'Features', label: isLoggedIn ? 'AI Agents' : 'Features', icon: isLoggedIn ? Bot : Layers },
-    { name: 'Work', label: 'Work', icon: CheckSquare },
-    { name: 'Money', label: 'Money', icon: DollarSign },
-    { name: 'People', label: 'People', icon: Users },
-    { name: 'Intelligence', label: 'Intelligence', icon: BrainCircuit },
-    { name: 'ARCChat', label: 'ARC Chat', icon: MessageSquare },
-    { name: 'Analytics', label: 'Analytics', icon: BarChart3 },
-    { name: 'Playbooks', label: 'Playbooks', icon: BookOpen },
-    { name: 'How It Works', label: isLoggedIn ? 'ERP Sync' : 'How It Works', icon: isLoggedIn ? RefreshCw : Zap },
-    { name: 'Network', label: 'Network', icon: Network },
-    { name: 'Onboard', label: 'Onboard', icon: Zap },
-    { name: 'Pricing', label: isLoggedIn ? 'Billing' : 'Pricing', icon: CreditCard },
-    { name: 'About', label: isLoggedIn ? 'Directory' : 'About', icon: Users },
-    { name: 'Settings', label: 'Settings', icon: Settings2 },
+    { name: 'Home', label: 'Home', icon: Globe },
+    { name: 'Features', label: 'Features', icon: Layers },
+    { name: 'How It Works', label: 'How It Works', icon: Zap },
+    { name: 'Pricing', label: 'Pricing', icon: CreditCard },
+    { name: 'Use Cases', label: 'Use Cases', icon: Briefcase },
+    { name: 'About', label: 'About', icon: Users },
+    { name: 'Contact', label: 'Contact', icon: Mail },
   ];
 
   return (
@@ -263,17 +355,11 @@ const SideNav = ({ activeTab, setActiveTab, onStartFree, onLogout, isLoggedIn }:
       </nav>
 
       <div className="p-6 mt-auto space-y-3">
-        {!isLoggedIn ? (
-          <Button onClick={onStartFree} className="w-full bg-[#818cf8] hover:bg-[#6366f1] h-11 rounded-xl font-bold shadow-lg shadow-indigo-600/20">
-            Start Free Trial <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
-        ) : (
-          <Button onClick={onStartFree} className="w-full bg-white/5 hover:bg-white/10 text-white h-11 rounded-xl font-bold border border-white/10">
-            Upgrade Plan <ArrowUpRight className="ml-2 h-4 w-4" />
-          </Button>
-        )}
+        <Button onClick={onStartFree} className="w-full bg-[#818cf8] hover:bg-[#6366f1] h-11 rounded-xl font-bold shadow-lg shadow-indigo-600/20">
+          Start Free Trial <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
         <Button variant="ghost" onClick={onLogout} className="w-full text-[#6e6e8a] hover:text-white gap-2 justify-start px-5 h-11">
-          {isLoggedIn ? <History className="h-4 w-4" /> : <User className="h-4 w-4" />} {isLoggedIn ? 'Sign Out' : 'Sign In'}
+          <User className="h-4 w-4" /> Sign In
         </Button>
       </div>
     </aside>
@@ -2761,24 +2847,983 @@ const ContactPage = () => (
   </ContentWrapper>
 );
 
+// =============================================
+// NEW MINIMAL 3-SCREEN DASHBOARD
+// =============================================
+
+type DashboardScreen = 'Pulse' | 'Agents' | 'ARC';
+
+// --- Breathing Status Dot ---
+const BreathingDot = ({ color }: { color: 'green' | 'yellow' | 'red' }) => {
+  const colorMap = {
+    green: 'bg-emerald-500 shadow-emerald-500/50',
+    yellow: 'bg-amber-500 shadow-amber-500/50',
+    red: 'bg-rose-500 shadow-rose-500/50',
+  };
+  return (
+    <span className="relative flex h-2.5 w-2.5">
+      <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-40 ${colorMap[color]}`} />
+      <span className={`relative inline-flex rounded-full h-2.5 w-2.5 shadow-[0_0_8px] ${colorMap[color]}`} />
+    </span>
+  );
+};
+
+// --- SCREEN 1: PULSE ---
+const PulseDashboard = () => {
+  const [insightIndex, setInsightIndex] = React.useState(0);
+  const insights = [
+    "Raffoul churn risk at 72%. Three overdue invoices, no contact in 30 days.",
+    "Revenue up 12% MoM. MRR growth is accelerating — strongest Q1 in 3 years.",
+    "Network Sector 4: 3 devices offline for 48h. Auto-recovery failed. Manual check recommended.",
+    "Pipeline: EPIC Expansion deal ($42K) closing probability just hit 85%. Follow up today.",
+    "AR alert: $28,400 overdue. Top 3 offenders account for 74% of balance.",
+    "Field service backlog growing 3rd consecutive week. Consider temporary contractor.",
+  ];
+
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setInsightIndex((prev) => (prev + 1) % insights.length);
+    }, 8000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const [approvals, setApprovals] = React.useState([
+    { id: 1, agent: "Finance", color: "#34d399", action: "Send collection notice to Global Logistics ($4,200 overdue)" },
+    { id: 2, agent: "Helpdesk", color: "#818cf8", action: "Escalate ticket #8492 — SLA breach in 2 hours" },
+    { id: 3, agent: "HR", color: "#fbbf24", action: "Approve overtime for Marcus J. (4 hours field work)" },
+    { id: 4, agent: "Sales", color: "#f87171", action: "Send follow-up proposal to Caribbean Telecom ($18K deal)" },
+  ]);
+
+  const handleApprove = (id: number) => {
+    setApprovals(prev => prev.filter(a => a.id !== id));
+    toast.success("Approved and deployed.");
+  };
+
+  const handleReject = (id: number) => {
+    setApprovals(prev => prev.filter(a => a.id !== id));
+    toast.info("Rejected. Agent notified.");
+  };
+
+  const now = new Date();
+  const hour = now.getHours();
+  const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+  const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+  const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+  const vitals = [
+    { label: "Revenue", value: "$124,500", subtitle: "MRR", dot: "green" as const },
+    { label: "Helpdesk", value: "74", subtitle: "12 urgent", dot: "red" as const },
+    { label: "Network", value: "82%", subtitle: "142/173 online", dot: "yellow" as const },
+    { label: "Overdue", value: "$28,400", subtitle: "AR balance", dot: "red" as const },
+    { label: "Pipeline", value: "$64,200", subtitle: "active deals", dot: "green" as const },
+    { label: "Field Service", value: "18", subtitle: "backlog", dot: "yellow" as const },
+  ];
+
+  const recentActivity = [
+    { time: "14:22", agent: "Helpdesk", action: "Triaged ticket #9102 → assigned Hardware Tier 2" },
+    { time: "14:18", agent: "Finance", action: "Flagged churn risk for Domino Ltd — 3 overdue invoices" },
+    { time: "14:05", agent: "Network", action: "Auto-recovered Sector 4 backup gateway" },
+    { time: "13:58", agent: "Sales", action: "Enriched 12 leads with helpdesk sentiment data" },
+    { time: "13:45", agent: "HR", action: "Rebalanced workload — shifted 4 tasks Marcus → Sarah" },
+    { time: "13:30", agent: "Finance", action: "Generated 14 automated collection reminders" },
+    { time: "13:22", agent: "ARC", action: "Reduced Sector 2 priority — low pipeline activity" },
+    { time: "13:10", agent: "Helpdesk", action: "Closed 6 tickets — average resolution 2.4h" },
+    { time: "12:55", agent: "Network", action: "Firmware update pushed to 28 devices in Sector 1" },
+    { time: "12:40", agent: "Sales", action: "Scheduled follow-up call with Caribbean Telecom" },
+  ];
+
+  const agentColors: Record<string, string> = {
+    "Helpdesk": "bg-indigo-500/20 text-indigo-400",
+    "Finance": "bg-emerald-500/20 text-emerald-400",
+    "Network": "bg-amber-500/20 text-amber-400",
+    "Sales": "bg-rose-500/20 text-rose-400",
+    "HR": "bg-violet-500/20 text-violet-400",
+    "ARC": "bg-purple-500/20 text-purple-400",
+  };
+
+  return (
+    <div className="p-6 md:p-10 lg:p-12 max-w-[1200px] mx-auto space-y-8">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
+            {greeting}, <span className="text-[#818cf8]">Eric</span>
+          </h1>
+          <p className="text-sm text-[#6e6e8a] mt-1 font-medium">{dateStr} · {timeStr}</p>
+        </div>
+        <div className="hidden md:flex items-center gap-2 opacity-40">
+          <Cpu className="h-5 w-5 text-[#818cf8]" />
+          <span className="text-xs font-black tracking-tighter text-white">AIOM</span>
+        </div>
+      </div>
+
+      {/* Vital Signs */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        {vitals.map((v, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.05 }}
+            className="bg-[#0c0d19]/55 backdrop-blur-[20px] border border-white/[0.06] rounded-2xl p-4 space-y-2"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[9px] font-bold text-[#6e6e8a] uppercase tracking-[0.15em]">{v.label}</span>
+              <BreathingDot color={v.dot} />
+            </div>
+            <p className="text-2xl font-mono font-black text-white leading-none">{v.value}</p>
+            <p className="text-[10px] text-[#6e6e8a] font-medium">{v.subtitle}</p>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* AI Insight Bar */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3 }}
+        className="bg-[#0c0d19]/55 backdrop-blur-[20px] border border-white/[0.06] rounded-2xl px-5 py-4 border-l-[3px] border-l-purple-500/70"
+      >
+        <div className="flex items-center gap-4">
+          <div className="flex-shrink-0 flex items-center gap-2">
+            <Sparkles className="h-3.5 w-3.5 text-purple-400" />
+            <span className="text-[9px] font-bold text-purple-400 uppercase tracking-[0.15em]">ARC Insight</span>
+          </div>
+          <div className="flex-1 min-w-0 h-6 flex items-center overflow-hidden">
+            <AnimatePresence mode="wait">
+              <motion.p
+                key={insightIndex}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.4 }}
+                className="text-sm text-[#c8c8d8] font-medium truncate"
+              >
+                {insights[insightIndex]}
+              </motion.p>
+            </AnimatePresence>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Needs Your Call */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.4 }}
+        className="space-y-3"
+      >
+        <h2 className="text-[10px] font-bold text-[#6e6e8a] uppercase tracking-[0.2em] px-1">Needs Your Call</h2>
+        <div className="space-y-2 max-h-[280px] overflow-y-auto no-scrollbar">
+          <AnimatePresence mode="popLayout">
+            {approvals.length === 0 ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="bg-[#0c0d19]/55 backdrop-blur-[20px] border border-white/[0.06] rounded-2xl p-6 flex items-center justify-center gap-3"
+              >
+                <div className="h-8 w-8 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                  <Check className="h-4 w-4 text-emerald-500" />
+                </div>
+                <p className="text-sm text-[#6e6e8a] font-medium">All clear. Your agents are handling it.</p>
+              </motion.div>
+            ) : (
+              approvals.map((a) => (
+                <motion.div
+                  key={a.id}
+                  layout
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20, height: 0, marginBottom: 0 }}
+                  transition={{ duration: 0.25 }}
+                  className="bg-[#0c0d19]/55 backdrop-blur-[20px] border border-white/[0.06] rounded-2xl px-5 py-3.5 flex items-center gap-4"
+                >
+                  <span
+                    className="h-2.5 w-2.5 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: a.color }}
+                  />
+                  <p className="text-sm text-[#c8c8d8] font-medium flex-1 min-w-0 truncate">
+                    <span className="text-[10px] font-bold text-[#6e6e8a] uppercase tracking-wider mr-2">{a.agent}</span>
+                    {a.action}
+                  </p>
+                  <div className="flex gap-2 flex-shrink-0">
+                    <Button
+                      size="sm"
+                      onClick={() => handleApprove(a.id)}
+                      className="h-7 px-3 text-[10px] font-bold bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 rounded-lg"
+                    >
+                      Approve
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleReject(a.id)}
+                      className="h-7 px-3 text-[10px] font-bold text-[#6e6e8a] hover:text-rose-400 rounded-lg"
+                    >
+                      Reject
+                    </Button>
+                  </div>
+                </motion.div>
+              ))
+            )}
+          </AnimatePresence>
+        </div>
+      </motion.div>
+
+      {/* Recent Activity */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5 }}
+        className="space-y-3"
+      >
+        <h2 className="text-[10px] font-bold text-[#6e6e8a] uppercase tracking-[0.2em] px-1">Recent Activity</h2>
+        <div className="bg-[#0c0d19]/55 backdrop-blur-[20px] border border-white/[0.06] rounded-2xl overflow-hidden">
+          {recentActivity.map((item, i) => (
+            <div
+              key={i}
+              className={`flex items-start gap-4 px-5 py-3 ${i < recentActivity.length - 1 ? 'border-b border-white/[0.04]' : ''} hover:bg-white/[0.02] transition-colors`}
+            >
+              <span className="text-[11px] font-mono text-[#6e6e8a] pt-0.5 w-10 flex-shrink-0">{item.time}</span>
+              <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md flex-shrink-0 ${agentColors[item.agent] || 'bg-white/10 text-white/60'}`}>
+                {item.agent}
+              </span>
+              <span className="text-[12px] text-[#c8c8d8] font-medium leading-snug">{item.action}</span>
+            </div>
+          ))}
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
+// --- SCREEN 2: AGENTS ---
+const AgentsDashboard = () => {
+  const [selectedAgent, setSelectedAgent] = React.useState<string | null>(null);
+  const [directive, setDirective] = React.useState("");
+
+  type AgentInfo = {
+    name: string;
+    role: string;
+    status: 'active' | 'busy' | 'critical';
+    lastAction: string;
+    uptime: string;
+    color: string;
+    autonomy: { label: string; level: number }[];
+    recentActions: string[];
+  };
+
+  const agents: Record<string, AgentInfo> = {
+    "ARC": {
+      name: "ARC", role: "Chief Executive Agent", status: "active",
+      lastAction: "Strategy recalibration — reduced Sector 2 priority", uptime: "99.97%", color: "#818cf8",
+      autonomy: [
+        { label: "Strategic Decisions", level: 4 },
+        { label: "Resource Allocation", level: 3 },
+        { label: "Agent Oversight", level: 4 },
+        { label: "External Comms", level: 1 },
+      ],
+      recentActions: [
+        "Recalibrated department priorities based on Q1 pipeline data",
+        "Flagged Raffoul as high churn risk — initiated retention protocol",
+        "Approved Finance agent's collection batch (14 notices)",
+        "Reduced Sector 2 agent allocation by 20%",
+        "Generated weekly business summary for Eric",
+      ],
+    },
+    "Sales": {
+      name: "Sales Manager", role: "Revenue & Pipeline", status: "active",
+      lastAction: "Enriched 12 CRM leads with sentiment data", uptime: "99.91%", color: "#f87171",
+      autonomy: [
+        { label: "Lead Scoring", level: 4 },
+        { label: "Outbound Emails", level: 2 },
+        { label: "Deal Negotiation", level: 1 },
+        { label: "Proposal Generation", level: 3 },
+      ],
+      recentActions: [
+        "Cross-referenced CRM with helpdesk sentiment data",
+        "Scheduled follow-up with Caribbean Telecom",
+        "Updated pipeline forecast — $64.2K active",
+        "Generated proposal for EPIC Expansion ($42K)",
+        "Flagged 3 stale leads for cleanup",
+      ],
+    },
+    "Finance": {
+      name: "Finance Agent", role: "AR, Billing & Collections", status: "busy",
+      lastAction: "Generated 14 automated collection reminders", uptime: "99.95%", color: "#34d399",
+      autonomy: [
+        { label: "Invoice Generation", level: 4 },
+        { label: "Collection Notices", level: 3 },
+        { label: "Late Fees", level: 2 },
+        { label: "Refunds", level: 0 },
+      ],
+      recentActions: [
+        "Generated 14 automated collection reminders",
+        "Flagged Domino Ltd as churn risk — 3 overdue",
+        "Reconciled $12,400 in payments",
+        "Prepared AR aging report for ARC",
+        "Applied late fee to Prime Tech ($150)",
+      ],
+    },
+    "Helpdesk": {
+      name: "Helpdesk Agent", role: "Support & Ticket Management", status: "busy",
+      lastAction: "Triaged ticket #9102 to Hardware Tier 2", uptime: "99.88%", color: "#818cf8",
+      autonomy: [
+        { label: "Ticket Triage", level: 4 },
+        { label: "Auto-Response", level: 3 },
+        { label: "Escalation", level: 2 },
+        { label: "SLA Overrides", level: 1 },
+      ],
+      recentActions: [
+        "Triaged ticket #9102 → Hardware Tier 2",
+        "Closed 6 tickets — avg resolution 2.4h",
+        "Escalated ticket #8492 — SLA breach imminent",
+        "Auto-responded to 8 low-priority inquiries",
+        "Updated knowledge base with new FAQ entries",
+      ],
+    },
+    "Network": {
+      name: "Network Agent", role: "Infrastructure & Monitoring", status: "critical",
+      lastAction: "Auto-recovered Sector 4 backup gateway", uptime: "98.42%", color: "#fbbf24",
+      autonomy: [
+        { label: "Auto-Recovery", level: 4 },
+        { label: "Firmware Updates", level: 3 },
+        { label: "Device Provisioning", level: 2 },
+        { label: "Config Changes", level: 1 },
+      ],
+      recentActions: [
+        "Auto-recovered Sector 4 backup gateway",
+        "Pushed firmware update to 28 devices",
+        "Detected 3 offline devices in Sector 4 (48h)",
+        "Provisioned 5 new CPEs for onboarding",
+        "Generated network health report — 82% online",
+      ],
+    },
+    "HR": {
+      name: "HR Agent", role: "Workforce & Capacity", status: "active",
+      lastAction: "Rebalanced workload — Marcus → Sarah", uptime: "99.93%", color: "#a78bfa",
+      autonomy: [
+        { label: "Workload Balancing", level: 4 },
+        { label: "Schedule Changes", level: 3 },
+        { label: "Overtime Approval", level: 1 },
+        { label: "Hiring Requests", level: 0 },
+      ],
+      recentActions: [
+        "Rebalanced workload — shifted 4 tasks Marcus → Sarah",
+        "Flagged technician capacity at 94%",
+        "Scheduled training session for new hire",
+        "Generated weekly workforce utilization report",
+        "Recommended temporary contractor for field backlog",
+      ],
+    },
+  };
+
+  const selectedAgentData = selectedAgent ? agents[selectedAgent] : null;
+
+  const statusColors = {
+    active: { dot: 'bg-emerald-500', text: 'text-emerald-400', bg: 'bg-emerald-500/10' },
+    busy: { dot: 'bg-amber-500', text: 'text-amber-400', bg: 'bg-amber-500/10' },
+    critical: { dot: 'bg-rose-500', text: 'text-rose-400', bg: 'bg-rose-500/10' },
+  };
+
+  const handleSendDirective = () => {
+    if (!directive.trim() || !selectedAgent) return;
+    toast.success(`Directive sent to ${agents[selectedAgent].name}: "${directive}"`);
+    setDirective("");
+  };
+
+  const orgTree = [
+    { id: "Eric", name: "Eric", role: "Owner", level: 0, color: "#818cf8" },
+    { id: "ARC", name: "ARC", role: "CEO Agent", level: 1, color: "#818cf8" },
+    { id: "Sales", name: "Sales Mgr", role: "Revenue", level: 2, color: "#f87171" },
+    { id: "Finance", name: "Finance", role: "AR & Billing", level: 2, color: "#34d399" },
+    { id: "Helpdesk", name: "Helpdesk", role: "Support", level: 2, color: "#818cf8" },
+    { id: "Network", name: "Network", role: "Infrastructure", level: 2, color: "#fbbf24" },
+    { id: "HR", name: "HR", role: "Workforce", level: 2, color: "#a78bfa" },
+    { id: "FieldSvc", name: "Field Svc", role: "Operations", level: 2, color: "#f97316" },
+  ];
+
+  return (
+    <div className="p-6 md:p-10 lg:p-12 max-w-[1200px] mx-auto">
+      <div className="mb-10">
+        <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">Agent Fleet</h1>
+        <p className="text-sm text-[#6e6e8a] mt-1 font-medium">Your AI workforce hierarchy</p>
+      </div>
+
+      {/* Org Tree */}
+      <div className="flex flex-col items-center gap-6">
+        {/* Eric - Owner */}
+        <motion.button
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-[#0c0d19]/55 backdrop-blur-[20px] border border-white/[0.06] rounded-2xl px-6 py-4 flex items-center gap-3 hover:border-[#818cf8]/30 transition-all"
+        >
+          <div className="h-10 w-10 rounded-full bg-[#818cf8]/20 flex items-center justify-center">
+            <User className="h-5 w-5 text-[#818cf8]" />
+          </div>
+          <div className="text-left">
+            <p className="text-sm font-bold text-white">Eric</p>
+            <p className="text-[10px] text-[#6e6e8a] font-medium">Owner</p>
+          </div>
+        </motion.button>
+
+        {/* Connector line */}
+        <div className="w-px h-6 bg-white/10" />
+
+        {/* ARC - CEO */}
+        <motion.button
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          onClick={() => setSelectedAgent("ARC")}
+          className={`bg-[#0c0d19]/55 backdrop-blur-[20px] border rounded-2xl px-6 py-4 flex items-center gap-3 transition-all cursor-pointer ${
+            selectedAgent === 'ARC' ? 'border-[#818cf8]/50 shadow-[0_0_20px_rgba(129,140,248,0.15)]' : 'border-white/[0.06] hover:border-[#818cf8]/30'
+          }`}
+        >
+          <div className="h-10 w-10 rounded-full bg-[#818cf8]/20 flex items-center justify-center relative">
+            <BrainCircuit className="h-5 w-5 text-[#818cf8]" />
+            <span className="absolute -top-0.5 -right-0.5">
+              <BreathingDot color={agents["ARC"].status === 'active' ? 'green' : agents["ARC"].status === 'busy' ? 'yellow' : 'red'} />
+            </span>
+          </div>
+          <div className="text-left">
+            <p className="text-sm font-bold text-white">ARC</p>
+            <p className="text-[10px] text-[#6e6e8a] font-medium">Chief Executive Agent</p>
+          </div>
+        </motion.button>
+
+        {/* Connector lines to department heads */}
+        <div className="relative w-full max-w-[900px]">
+          <div className="absolute left-1/2 -translate-x-px -top-0 w-px h-6 bg-white/10" />
+          <div className="absolute top-6 left-[8.33%] right-[8.33%] h-px bg-white/10" />
+          {/* Vertical drops */}
+          {[16.66, 30, 43.33, 56.66, 70, 83.33].map((pct, i) => (
+            <div key={i} className="absolute h-6 w-px bg-white/10" style={{ left: `${pct}%`, top: '24px' }} />
+          ))}
+        </div>
+
+        {/* Department Heads */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 w-full mt-4">
+          {(["Sales", "Finance", "Helpdesk", "Network", "HR"] as const).map((agentKey, i) => {
+            const agent = agents[agentKey];
+            const sc = statusColors[agent.status];
+            return (
+              <motion.button
+                key={agentKey}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 + i * 0.05 }}
+                onClick={() => setSelectedAgent(agentKey)}
+                className={`bg-[#0c0d19]/55 backdrop-blur-[20px] border rounded-2xl p-4 text-center transition-all cursor-pointer ${
+                  selectedAgent === agentKey ? 'border-[#818cf8]/50 shadow-[0_0_20px_rgba(129,140,248,0.15)]' : 'border-white/[0.06] hover:border-white/[0.12]'
+                }`}
+              >
+                <div className="mx-auto h-10 w-10 rounded-full flex items-center justify-center relative mb-2" style={{ backgroundColor: agent.color + '20' }}>
+                  <Bot className="h-5 w-5" style={{ color: agent.color }} />
+                  <span className="absolute -top-0.5 -right-0.5">
+                    <BreathingDot color={agent.status === 'active' ? 'green' : agent.status === 'busy' ? 'yellow' : 'red'} />
+                  </span>
+                </div>
+                <p className="text-xs font-bold text-white">{agent.name.split(' ')[0]}</p>
+                <p className="text-[9px] text-[#6e6e8a] font-medium mt-0.5">{agent.role}</p>
+              </motion.button>
+            );
+          })}
+          {/* Field Service placeholder (not in agents map) */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="bg-[#0c0d19]/55 backdrop-blur-[20px] border border-white/[0.06] rounded-2xl p-4 text-center opacity-60"
+          >
+            <div className="mx-auto h-10 w-10 rounded-full flex items-center justify-center relative mb-2 bg-orange-500/20">
+              <Briefcase className="h-5 w-5 text-orange-400" />
+              <span className="absolute -top-0.5 -right-0.5">
+                <BreathingDot color="yellow" />
+              </span>
+            </div>
+            <p className="text-xs font-bold text-white">Field Svc</p>
+            <p className="text-[9px] text-[#6e6e8a] font-medium mt-0.5">Operations</p>
+          </motion.div>
+        </div>
+      </div>
+
+      {/* Slide-in Agent Detail Panel */}
+      <AnimatePresence>
+        {selectedAgentData && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedAgent(null)}
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50"
+            />
+            {/* Panel */}
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              className="fixed right-0 top-0 bottom-0 w-full max-w-[440px] bg-[#0a0b18] border-l border-white/[0.08] z-50 overflow-y-auto no-scrollbar"
+            >
+              <div className="p-8 space-y-8">
+                {/* Header */}
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="h-12 w-12 rounded-full flex items-center justify-center relative" style={{ backgroundColor: selectedAgentData.color + '20' }}>
+                      {selectedAgent === 'ARC' ? <BrainCircuit className="h-6 w-6" style={{ color: selectedAgentData.color }} /> : <Bot className="h-6 w-6" style={{ color: selectedAgentData.color }} />}
+                      <span className="absolute -bottom-0.5 -right-0.5">
+                        <BreathingDot color={selectedAgentData.status === 'active' ? 'green' : selectedAgentData.status === 'busy' ? 'yellow' : 'red'} />
+                      </span>
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-bold text-white">{selectedAgentData.name}</h2>
+                      <p className="text-xs text-[#6e6e8a] font-medium">{selectedAgentData.role}</p>
+                    </div>
+                  </div>
+                  <button onClick={() => setSelectedAgent(null)} className="p-2 hover:bg-white/5 rounded-lg text-[#6e6e8a] hover:text-white transition-colors">
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+
+                {/* Status Strip */}
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-3">
+                    <p className="text-[9px] font-bold text-[#6e6e8a] uppercase tracking-wider mb-1">Status</p>
+                    <div className="flex items-center gap-2">
+                      <span className={`h-2 w-2 rounded-full ${statusColors[selectedAgentData.status].dot}`} />
+                      <span className={`text-xs font-bold capitalize ${statusColors[selectedAgentData.status].text}`}>{selectedAgentData.status}</span>
+                    </div>
+                  </div>
+                  <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-3">
+                    <p className="text-[9px] font-bold text-[#6e6e8a] uppercase tracking-wider mb-1">Uptime</p>
+                    <p className="text-xs font-mono font-bold text-white">{selectedAgentData.uptime}</p>
+                  </div>
+                  <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-3">
+                    <p className="text-[9px] font-bold text-[#6e6e8a] uppercase tracking-wider mb-1">Last Active</p>
+                    <p className="text-xs font-mono font-bold text-white">2m ago</p>
+                  </div>
+                </div>
+
+                {/* Last Action */}
+                <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-4">
+                  <p className="text-[9px] font-bold text-[#6e6e8a] uppercase tracking-wider mb-2">Last Action</p>
+                  <p className="text-sm text-[#c8c8d8] font-medium">{selectedAgentData.lastAction}</p>
+                </div>
+
+                {/* Autonomy Sliders */}
+                <div className="space-y-4">
+                  <h3 className="text-[10px] font-bold text-[#6e6e8a] uppercase tracking-[0.2em]">Autonomy Levels</h3>
+                  {selectedAgentData.autonomy.map((a, i) => (
+                    <div key={i} className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-[#c8c8d8] font-medium">{a.label}</span>
+                        <span className="text-[10px] font-mono font-bold text-[#818cf8]">{a.level}/4</span>
+                      </div>
+                      <div className="flex gap-1.5">
+                        {[0, 1, 2, 3, 4].map((level) => (
+                          <button
+                            key={level}
+                            className={`h-2 flex-1 rounded-full transition-all ${
+                              level <= a.level ? 'bg-[#818cf8]' : 'bg-white/[0.06]'
+                            } hover:opacity-80`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Recent Actions */}
+                <div className="space-y-3">
+                  <h3 className="text-[10px] font-bold text-[#6e6e8a] uppercase tracking-[0.2em]">Recent Actions</h3>
+                  <div className="space-y-2">
+                    {selectedAgentData.recentActions.map((action, i) => (
+                      <div key={i} className="flex items-start gap-3 py-2 border-b border-white/[0.04] last:border-0">
+                        <span className="text-[10px] font-mono text-[#6e6e8a] pt-0.5 flex-shrink-0">{String(i + 1).padStart(2, '0')}</span>
+                        <p className="text-xs text-[#c8c8d8] font-medium leading-snug">{action}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Directive Input */}
+                <div className="space-y-3">
+                  <h3 className="text-[10px] font-bold text-[#6e6e8a] uppercase tracking-[0.2em]">Send Directive</h3>
+                  <div className="flex gap-2">
+                    <Input
+                      value={directive}
+                      onChange={(e) => setDirective(e.target.value)}
+                      placeholder={`"Focus on Raffoul this week"`}
+                      className="bg-white/[0.03] border-white/[0.08] rounded-xl h-11 text-sm placeholder:text-[#6e6e8a]/50"
+                      onKeyDown={(e) => e.key === 'Enter' && handleSendDirective()}
+                    />
+                    <Button
+                      onClick={handleSendDirective}
+                      disabled={!directive.trim()}
+                      className="h-11 px-4 bg-[#818cf8] hover:bg-[#6366f1] rounded-xl disabled:opacity-30"
+                    >
+                      <Send className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+// --- SCREEN 3: ARC CHAT ---
+const ARCChatDashboard = () => {
+  const [messages, setMessages] = React.useState<{ role: 'arc' | 'user'; text: string }[]>([
+    { role: 'arc', text: "Good morning, Eric. All systems are operational. Revenue is tracking 12% above last month. I've identified 3 items that need your attention today.\n\nWould you like the full business summary, or should I focus on something specific?" },
+  ]);
+  const [input, setInput] = React.useState("");
+  const messagesEndRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const quickActions = [
+    "Business summary",
+    "Who needs attention?",
+    "Revenue report",
+    "Check Raffoul",
+  ];
+
+  const mockResponses: Record<string, string> = {
+    "business summary": "📊 **Business Summary — Today**\n\n• Revenue: $124,500 MRR (+12% MoM)\n• Pipeline: $64,200 across 8 active deals\n• AR Overdue: $28,400 (3 clients flagged)\n• Helpdesk: 74 open tickets, 12 urgent\n• Network: 82% online (142/173 devices)\n• Field Service: 18 tasks in backlog\n\n⚡ Key Insight: Revenue growth is strong, but AR and field backlog need attention this week.",
+    "who needs attention?": "🚨 **Needs Attention:**\n\n1. **Raffoul** — Churn risk 72%. Three overdue invoices ($8,400), no contact in 30 days. Recommend: call + payment plan.\n\n2. **Domino Ltd** — 3 invoices past 45 days ($4,200). Finance agent flagged yesterday. Collection notice queued.\n\n3. **Sector 4 Network** — 3 devices offline for 48h. Auto-recovery failed. Manual intervention needed.\n\n4. **Ticket #8492** — SLA breach in 2 hours. Customer: Prime Logistics. Issue: recurring billing discrepancy.\n\nWant me to draft an action plan for any of these?",
+    "revenue report": "💰 **Revenue Report — January 2026**\n\n┌─────────────┬──────────┬────────┐\n│ Metric      │ Value    │ Trend  │\n├─────────────┼──────────┼────────┤\n│ MRR         │ $124,500 │ ↑ 12%  │\n│ New MRR     │ $8,200   │ ↑ 24%  │\n│ Churned MRR │ $2,100   │ ↓ 8%   │\n│ Net New     │ $6,100   │ ↑ 31%  │\n│ Pipeline    │ $64,200  │ → flat │\n└─────────────┴──────────┴────────┘\n\nTop Deal: EPIC Expansion ($42K) — 85% close probability.\nAt-risk: Raffoul ($3,200/mo) — churn probability 72%.\n\nNet revenue retention is 104%. Strong quarter so far.",
+    "check raffoul": "🔍 **Client Profile: Raffoul**\n\n• Status: ⚠️ HIGH RISK\n• MRR: $3,200/month\n• Contract: 18 months remaining\n• Overdue AR: $8,400 (3 invoices)\n• Last Contact: 30 days ago\n• Tickets: 2 open (1 urgent)\n• Churn Score: 72%\n\n📋 **Risk Factors:**\n1. No response to last 3 billing reminders\n2. Open support ticket unresolved for 14 days\n3. Usage dropped 34% this month\n\n💡 **Recommendation:**\nSchedule a personal call. Offer a payment plan for overdue balance. Resolve open ticket #7829 before the call.\n\nWant me to draft the outreach email?",
+  };
+
+  const handleSend = (text: string) => {
+    if (!text.trim()) return;
+    setMessages(prev => [...prev, { role: 'user', text }]);
+    setInput("");
+
+    const lower = text.toLowerCase();
+    const responseKey = Object.keys(mockResponses).find(k => lower.includes(k));
+
+    setTimeout(() => {
+      if (responseKey) {
+        setMessages(prev => [...prev, { role: 'arc', text: mockResponses[responseKey] }]);
+      } else {
+        setMessages(prev => [...prev, {
+          role: 'arc',
+          text: `I'll look into "${text}" for you.\n\nBased on current data, here's what I found: This area is trending normally. No anomalies detected in the last 7 days. Would you like me to dig deeper or generate a detailed report?`
+        }]);
+      }
+    }, 800);
+  };
+
+  return (
+    <div className="flex flex-col h-full">
+      {/* Chat Header */}
+      <div className="flex-shrink-0 px-6 md:px-10 py-5 border-b border-white/[0.06]">
+        <div className="flex items-center gap-3">
+          <div className="h-9 w-9 rounded-full bg-[#818cf8]/20 flex items-center justify-center relative">
+            <BrainCircuit className="h-5 w-5 text-[#818cf8]" />
+            <span className="absolute -bottom-0.5 -right-0.5">
+              <BreathingDot color="green" />
+            </span>
+          </div>
+          <div>
+            <h2 className="text-sm font-bold text-white">ARC</h2>
+            <p className="text-[10px] text-emerald-400 font-medium">Online · All systems nominal</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto no-scrollbar px-6 md:px-10 py-6 space-y-5">
+        {messages.map((msg, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+          >
+            <div className={`flex items-start gap-3 max-w-[85%] md:max-w-[70%] ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
+              {msg.role === 'arc' && (
+                <div className="h-7 w-7 rounded-full bg-[#818cf8]/20 flex items-center justify-center flex-shrink-0 mt-1">
+                  <BrainCircuit className="h-3.5 w-3.5 text-[#818cf8]" />
+                </div>
+              )}
+              <div className={`rounded-2xl px-5 py-3.5 ${
+                msg.role === 'user'
+                  ? 'bg-[#818cf8]/20 border border-[#818cf8]/20 text-white'
+                  : 'bg-white/[0.04] border border-white/[0.06] text-[#c8c8d8]'
+              }`}>
+                <pre className="text-sm font-sans whitespace-pre-wrap leading-relaxed break-words font-medium">{msg.text}</pre>
+              </div>
+            </div>
+          </motion.div>
+        ))}
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Quick Actions + Input */}
+      <div className="flex-shrink-0 px-6 md:px-10 pb-6 pt-2 space-y-3">
+        {/* Quick action chips */}
+        <div className="flex flex-wrap gap-2">
+          {quickActions.map((action, i) => (
+            <button
+              key={i}
+              onClick={() => handleSend(action)}
+              className="px-3 py-1.5 text-[11px] font-medium text-[#818cf8] bg-[#818cf8]/10 border border-[#818cf8]/20 rounded-full hover:bg-[#818cf8]/20 transition-colors"
+            >
+              {action}
+            </button>
+          ))}
+        </div>
+
+        {/* Input */}
+        <form
+          onSubmit={(e) => { e.preventDefault(); handleSend(input); }}
+          className="flex gap-3"
+        >
+          <Input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Ask ARC anything about your business..."
+            className="bg-white/[0.03] border-white/[0.08] rounded-xl h-12 text-sm placeholder:text-[#6e6e8a]/50 flex-1"
+          />
+          <Button
+            type="submit"
+            disabled={!input.trim()}
+            className="h-12 w-12 bg-[#818cf8] hover:bg-[#6366f1] rounded-xl disabled:opacity-30 flex-shrink-0"
+          >
+            <Send className="h-5 w-5" />
+          </Button>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+// --- SETTINGS MODAL ---
+const SettingsModal = ({ open, onClose, onLogout }: { open: boolean; onClose: () => void; onLogout: () => void }) => {
+  const [notifications, setNotifications] = React.useState({ telegram: true, whatsapp: false, email: true });
+
+  if (!open) return null;
+
+  return (
+    <>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60]"
+      />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[420px] bg-[#0a0b18] border border-white/[0.08] rounded-2xl z-[60] overflow-hidden shadow-2xl"
+      >
+        <div className="p-6 space-y-6">
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-bold text-white">Settings</h2>
+            <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-lg text-[#6e6e8a] hover:text-white transition-colors">
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+
+          {/* ERP Connection */}
+          <div className="space-y-3">
+            <h3 className="text-[10px] font-bold text-[#6e6e8a] uppercase tracking-[0.2em]">ERP Connection</h3>
+            <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                  <Wifi className="h-4 w-4 text-emerald-400" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-white">Odoo ERP</p>
+                  <p className="text-[10px] text-emerald-400 font-medium">Connected · Last sync 2m ago</p>
+                </div>
+              </div>
+              <BreathingDot color="green" />
+            </div>
+          </div>
+
+          {/* Notifications */}
+          <div className="space-y-3">
+            <h3 className="text-[10px] font-bold text-[#6e6e8a] uppercase tracking-[0.2em]">Notifications</h3>
+            {[
+              { key: 'telegram' as const, label: 'Telegram', icon: MessageSquare },
+              { key: 'whatsapp' as const, label: 'WhatsApp', icon: Phone },
+              { key: 'email' as const, label: 'Email', icon: Mail },
+            ].map((n) => (
+              <div key={n.key} className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-3 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <n.icon className="h-4 w-4 text-[#6e6e8a]" />
+                  <span className="text-sm text-[#c8c8d8] font-medium">{n.label}</span>
+                </div>
+                <button
+                  onClick={() => setNotifications(prev => ({ ...prev, [n.key]: !prev[n.key] }))}
+                  className="transition-colors"
+                >
+                  {notifications[n.key] ? (
+                    <ToggleRight className="h-6 w-6 text-[#818cf8]" />
+                  ) : (
+                    <ToggleLeft className="h-6 w-6 text-[#6e6e8a]" />
+                  )}
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {/* Team */}
+          <div className="space-y-3">
+            <h3 className="text-[10px] font-bold text-[#6e6e8a] uppercase tracking-[0.2em]">Team</h3>
+            <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-3 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="h-7 w-7 rounded-full bg-[#818cf8]/20 flex items-center justify-center">
+                  <User className="h-3.5 w-3.5 text-[#818cf8]" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-white">Eric Giraud</p>
+                  <p className="text-[10px] text-[#6e6e8a] font-medium">Owner</p>
+                </div>
+              </div>
+              <Badge className="text-[9px] bg-[#818cf8]/10 text-[#818cf8] border-[#818cf8]/20">Admin</Badge>
+            </div>
+            <Button variant="ghost" className="w-full h-9 text-xs text-[#6e6e8a] hover:text-white border border-dashed border-white/10 rounded-xl gap-2">
+              <UserPlus className="h-3.5 w-3.5" /> Add Team Member
+            </Button>
+          </div>
+
+          {/* Sign Out */}
+          <Button
+            onClick={onLogout}
+            variant="ghost"
+            className="w-full h-11 text-sm font-medium text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-xl gap-2"
+          >
+            <LogOut className="h-4 w-4" /> Sign Out
+          </Button>
+        </div>
+      </motion.div>
+    </>
+  );
+};
+
+// --- NAV RAIL (Desktop) + BOTTOM BAR (Mobile) ---
+const NavRail = ({ activeScreen, setActiveScreen, onSettingsClick }: { activeScreen: DashboardScreen; setActiveScreen: (s: DashboardScreen) => void; onSettingsClick: () => void }) => {
+  const screens: { name: DashboardScreen; icon: typeof Activity; label: string }[] = [
+    { name: 'Pulse', icon: Activity, label: 'Pulse' },
+    { name: 'Agents', icon: Bot, label: 'Agents' },
+    { name: 'ARC', icon: MessageSquare, label: 'ARC' },
+  ];
+
+  return (
+    <>
+      {/* Desktop Rail */}
+      <aside className="hidden md:flex flex-col items-center w-[72px] border-r border-white/[0.06] bg-[#05060f] h-screen sticky top-0 shrink-0 z-50 py-6">
+        {/* Logo */}
+        <div className="mb-10">
+          <div className="h-10 w-10 rounded-xl bg-[#818cf8] flex items-center justify-center shadow-[0_0_20px_rgba(129,140,248,0.3)]">
+            <Cpu className="h-5 w-5 text-white" />
+          </div>
+        </div>
+
+        {/* Screen Icons */}
+        <nav className="flex-1 flex flex-col items-center gap-2">
+          {screens.map((s) => (
+            <button
+              key={s.name}
+              onClick={() => setActiveScreen(s.name)}
+              className={`relative w-12 h-12 rounded-xl flex items-center justify-center transition-all group ${
+                activeScreen === s.name
+                  ? 'bg-[#818cf8]/10 text-white'
+                  : 'text-[#6e6e8a] hover:text-white hover:bg-white/[0.04]'
+              }`}
+            >
+              <s.icon className={`h-5 w-5 ${activeScreen === s.name ? 'text-[#818cf8]' : ''}`} />
+              {activeScreen === s.name && (
+                <motion.div
+                  layoutId="railIndicator"
+                  className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-1 w-1 rounded-full bg-[#818cf8] shadow-[0_0_8px_rgba(129,140,248,0.6)]"
+                />
+              )}
+              {/* Tooltip */}
+              <span className="absolute left-full ml-2 px-2 py-1 text-[10px] font-bold text-white bg-[#1a1b2e] border border-white/10 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+                {s.label}
+              </span>
+            </button>
+          ))}
+        </nav>
+
+        {/* Settings */}
+        <button
+          onClick={onSettingsClick}
+          className="w-12 h-12 rounded-xl flex items-center justify-center text-[#6e6e8a] hover:text-white hover:bg-white/[0.04] transition-all"
+        >
+          <Settings className="h-5 w-5" />
+        </button>
+      </aside>
+
+      {/* Mobile Bottom Bar */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-[#05060f]/95 backdrop-blur-xl border-t border-white/[0.06] z-50 flex items-center justify-around px-4">
+        {screens.map((s) => (
+          <button
+            key={s.name}
+            onClick={() => setActiveScreen(s.name)}
+            className={`flex flex-col items-center gap-1 py-1 px-4 rounded-lg transition-all relative ${
+              activeScreen === s.name ? 'text-[#818cf8]' : 'text-[#6e6e8a]'
+            }`}
+          >
+            <s.icon className="h-5 w-5" />
+            <span className="text-[9px] font-bold uppercase tracking-wider">{s.label}</span>
+            {activeScreen === s.name && (
+              <motion.div
+                layoutId="mobileIndicator"
+                className="absolute -top-0 left-1/2 -translate-x-1/2 h-0.5 w-6 rounded-full bg-[#818cf8] shadow-[0_0_8px_rgba(129,140,248,0.6)]"
+              />
+            )}
+          </button>
+        ))}
+        <button
+          onClick={onSettingsClick}
+          className="flex flex-col items-center gap-1 py-1 px-4 rounded-lg text-[#6e6e8a] hover:text-white transition-all"
+        >
+          <Settings className="h-5 w-5" />
+          <span className="text-[9px] font-bold uppercase tracking-wider">Settings</span>
+        </button>
+      </nav>
+    </>
+  );
+};
+
 // --- Main App Component ---
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = React.useState(false);
   const [showLogin, setShowLogin] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState<NavTab>('Home');
+  const [activeScreen, setActiveScreen] = React.useState<DashboardScreen>('Pulse');
+  const [settingsOpen, setSettingsOpen] = React.useState(false);
   const scrollRef = React.useRef<HTMLDivElement>(null);
 
-  // Scroll to top on tab change
+  // Scroll to top on tab change (marketing pages)
   React.useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  }, [activeTab]);
+  }, [activeTab, activeScreen]);
 
   const handleStartFree = () => {
     if (isLoggedIn) {
-      setActiveTab('Pricing'); // Post-login upgrade path
+      setActiveTab('Pricing');
     } else {
       setActiveTab('Contact');
     }
@@ -2788,29 +3833,81 @@ export default function App() {
   const handleLogin = () => {
     setIsLoggedIn(true);
     setShowLogin(false);
-    setActiveTab('Home');
+    setActiveScreen('Pulse');
     toast.success("Welcome back, Commander.");
   };
 
   const handleLogout = () => {
     setIsLoggedIn(false);
+    setShowLogin(false);
+    setSettingsOpen(false);
     setActiveTab('Home');
     toast.info("Signed out.");
   };
 
+  // --- LOGGED IN: Minimal 3-screen experience ---
+  if (isLoggedIn) {
+    return (
+      <div className="min-h-screen bg-[#05060f] text-white selection:bg-[#818cf8]/30 flex overflow-hidden font-inter">
+        <AmbientOrbs />
+
+        <NavRail
+          activeScreen={activeScreen}
+          setActiveScreen={setActiveScreen}
+          onSettingsClick={() => setSettingsOpen(true)}
+        />
+
+        <div className="flex-1 flex flex-col relative z-10 overflow-hidden">
+          <main ref={scrollRef} className={`flex-1 overflow-y-auto custom-scrollbar scroll-smooth ${activeScreen === 'ARC' ? 'flex flex-col' : ''}`}>
+            <AnimatePresence mode="wait">
+              {activeScreen === 'Pulse' && (
+                <motion.div key="pulse" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <PulseDashboard />
+                  {/* Bottom padding for mobile nav */}
+                  <div className="h-20 md:h-0" />
+                </motion.div>
+              )}
+              {activeScreen === 'Agents' && (
+                <motion.div key="agents" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <AgentsDashboard />
+                  <div className="h-20 md:h-0" />
+                </motion.div>
+              )}
+              {activeScreen === 'ARC' && (
+                <motion.div key="arc" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex flex-col min-h-0">
+                  <ARCChatDashboard />
+                  <div className="h-20 md:h-0 flex-shrink-0" />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </main>
+        </div>
+
+        <AnimatePresence>
+          {settingsOpen && (
+            <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} onLogout={handleLogout} />
+          )}
+        </AnimatePresence>
+
+        <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap');
+          .font-inter { font-family: 'Inter', sans-serif; }
+          .font-mono { font-family: 'JetBrains Mono', monospace; }
+          .no-scrollbar::-webkit-scrollbar { display: none; }
+          .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+          .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+          .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+          .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.05); border-radius: 20px; }
+          .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.1); }
+        `}</style>
+      </div>
+    );
+  }
+
+  // --- LOGGED OUT: Marketing site (UNCHANGED) ---
   return (
     <div className="min-h-screen bg-[#05060f] text-white selection:bg-[#818cf8]/30 flex overflow-hidden font-inter">
       <AmbientOrbs />
-      
-      {isLoggedIn && (
-        <SideNav 
-          activeTab={activeTab} 
-          setActiveTab={setActiveTab} 
-          onStartFree={handleStartFree} 
-          onLogout={handleLogout} 
-          isLoggedIn={isLoggedIn}
-        />
-      )}
 
       <div className="flex-1 flex flex-col relative z-10 overflow-hidden">
         {/* Mobile Header */}
@@ -2822,8 +3919,8 @@ export default function App() {
           <Button variant="ghost" size="icon" className="text-white" onClick={() => setShowLogin(!showLogin)}><Menu className="h-6 w-6" /></Button>
         </header>
 
-        {/* Marketing Top Nav (Only visible when logged out and NOT showing login screen) */}
-        {!isLoggedIn && !showLogin && (
+        {/* Marketing Top Nav */}
+        {!showLogin && (
           <MarketingTopNav 
             activeTab={activeTab} 
             setActiveTab={setActiveTab} 
@@ -2831,80 +3928,36 @@ export default function App() {
           />
         )}
 
-        <main ref={scrollRef} className={`flex-1 overflow-y-auto custom-scrollbar scroll-smooth ${!isLoggedIn && !showLogin ? 'pt-20' : ''}`}>
+        <main ref={scrollRef} className={`flex-1 overflow-y-auto custom-scrollbar scroll-smooth ${!showLogin ? 'pt-20' : ''}`}>
           <AnimatePresence mode="wait">
             {showLogin ? (
               <LoginPage key="login" onLogin={handleLogin} onBack={() => setShowLogin(false)} />
             ) : (
               <>
-                {activeTab === 'Home' && (
-                  isLoggedIn ? <DashboardHome key="dash-home" /> : <HomePage key="home" onStartFree={handleStartFree} onLogin={() => setShowLogin(true)} />
-                )}
-                {activeTab === 'Features' && (
-                  isLoggedIn ? <DashboardAgents key="dash-agents" /> : <FeaturesPage key="features" onStartFree={handleStartFree} />
-                )}
-                {activeTab === 'Work' && <DashboardWork key="dash-work" />}
-                {activeTab === 'Money' && <DashboardMoney key="dash-money" />}
-                {activeTab === 'People' && <DashboardPeople key="dash-people" />}
-                {activeTab === 'Intelligence' && <DashboardIntelligence key="dash-intelligence" />}
-                {activeTab === 'ARCChat' && <DashboardARCChat key="dash-arcchat" />}
-                {activeTab === 'Analytics' && <DashboardAnalytics key="dash-analytics" />}
-                {activeTab === 'Playbooks' && <DashboardPlaybooks key="dash-playbooks" />}
-                {activeTab === 'Network' && <DashboardNetwork key="dash-network" />}
-                {activeTab === 'Settings' && <DashboardSettings key="dash-settings" />}
-                {activeTab === 'How It Works' && (
-                  isLoggedIn ? <DashboardERP key="dash-erp" /> : <HowItWorksPage key="howitworks" onStartFree={handleStartFree} />
-                )}
+                {activeTab === 'Home' && <HomePage key="home" onStartFree={handleStartFree} onLogin={() => setShowLogin(true)} />}
+                {activeTab === 'Features' && <FeaturesPage key="features" onStartFree={handleStartFree} />}
+                {activeTab === 'How It Works' && <HowItWorksPage key="howitworks" onStartFree={handleStartFree} />}
                 {activeTab === 'Pricing' && <PricingPage key="pricing" onStartFree={handleStartFree} />}
                 {activeTab === 'Use Cases' && <UseCasesPage key="usecases" onStartFree={handleStartFree} />}
-                {activeTab === 'About' && (
-                  isLoggedIn ? <DashboardDirectory key="dash-directory" /> : <AboutPage key="about" onStartFree={handleStartFree} />
-                )}
-                {activeTab === 'Onboard' && (
-                  <DashboardOnboard key="dash-onboard" onComplete={() => setActiveTab('Home')} />
-                )}
+                {activeTab === 'About' && <AboutPage key="about" onStartFree={handleStartFree} />}
                 {activeTab === 'Contact' && <ContactPage key="contact" />}
-                
-                {/* Fallback for other tabs */}
-                {!['Home', 'Features', 'How It Works', 'Pricing', 'Use Cases', 'About', 'Contact', 'Analytics', 'Playbooks', 'Network', 'Settings', 'Onboard', 'Work', 'Money', 'People', 'Intelligence'].includes(activeTab) && (
-                  <ContentWrapper key="other">
-                    <section className="min-h-[80vh] flex flex-col items-center justify-center text-center px-4">
-                      <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-6 uppercase tracking-tight">{activeTab}</h1>
-                      <p className="text-[#c8c8d8] text-xl max-w-xl mx-auto mb-12">This section is being deployed to the AIOM marketing matrix. The intelligence agents are finalizing the content for {activeTab}.</p>
-                      <Button onClick={() => setActiveTab('Home')} className="bg-[#818cf8] hover:bg-[#6366f1] h-12 px-8 rounded-xl font-bold">Back to Base Intelligence</Button>
-                    </section>
-                  </ContentWrapper>
-                )}
               </>
             )}
           </AnimatePresence>
-          {!showLogin && !isLoggedIn && <Footer />}
+          {!showLogin && <Footer />}
         </main>
       </div>
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap');
-        
         .font-inter { font-family: 'Inter', sans-serif; }
         .font-mono { font-family: 'JetBrains Mono', monospace; }
-
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 6px;
-          height: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.05);
-          border-radius: 20px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: rgba(255, 255, 255, 0.1);
-        }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.05); border-radius: 20px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.1); }
       `}</style>
     </div>
   );
